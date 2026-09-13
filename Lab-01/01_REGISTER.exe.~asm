@@ -1,0 +1,17 @@
+.MODEL SMALL
+.STACK 100H
+
+.DATA
+.CODE
+MAIN PROC
+MOV AX, 0005H
+MOV BX, 0003H
+ADD AX, BX
+SUB AX, BX
+
+MOV AH, 4CH
+INT 21H
+
+
+
+; [SOURCE]: D:\Workspace\coal-resources\Lab-01\01_REGISTER.asm
