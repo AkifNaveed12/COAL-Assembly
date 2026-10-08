@@ -1,0 +1,30 @@
+include 'emu8086.inc'
+
+.MODEL SMALL
+.STACK 100H
+
+.DATA
+Num DW 5
+
+.CODE
+MAIN PROC
+MOV AX, @DATA
+MOV DS, AX
+
+CALL CLEAR_SCREEN       ; was CALL CLRSCR
+MOV AX, Num             ; was MOV EAX, Num
+CALL PRINT_NUM          ; was CALL WriteDec
+
+MOV AH, 4CH             ; was EXIT
+INT 21H
+MAIN ENDP
+
+DEFINE_CLEAR_SCREEN         ; required for CLEAR_SCREEN
+DEFINE_PRINT_NUM            ; required for PRINT_NUM
+DEFINE_PRINT_NUM_UNS        ; required by PRINT_NUM
+
+END MAIN
+
+
+
+; [SOURCE]: D:\Workspace\coal-resources\lab-05\task1.asm
