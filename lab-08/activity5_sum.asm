@@ -1,0 +1,141 @@
+
+section .data
+    msg db "Enter 10 non-negative integers:", 10
+    msg_len equ $ - msg
+    result_msg db "Sum = "
+    result_len equ $ - result_msg
+    newline db 10
+
+section .bss
+    array resd 10
+    input_byte resb 1
+
+section .text
+    global _start
+
+_start:
+    mov eax, 1
+    mov edi, 1
+    mov rsi, msg
+    mov edx, msg_len
+    syscall
+
+    xor r12d, r12d
+
+input_loop:
+    cmp r12d, 10
+    jge calculate_sum
+
+    call read_int
+    mov [array + r12*4], eax
+    inc r12d
+    jmp input_loop
+
+calculate_sum:
+    xor r14d, r14d
+    xor r12d, r12d
+
+sum_loop:
+    cmp r12d, 10
+    jge show_sum
+
+    mov eax, [array + r12*4]
+    add r14d, eax
+    inc r12d
+    jmp sum_loop
+
+show_sum:
+    mov eax, 1
+    mov edi, 1
+    mov rsi, result_msg
+    mov edx, result_len
+    syscall
+
+    mov eax, r14d
+    call print_int
+
+    mov eax, 1
+    mov edi, 1
+    mov rsi, newline
+    mov edx, 1
+    syscall
+
+    mov eax, 60
+    xor edi, edi
+    syscall
+
+read_int:
+    xor r8d, r8d
+
+.read_char:
+    xor eax, eax
+    xor edi, edi
+    mov rsi, input_byte
+    mov edx, 1
+    syscall
+
+    test eax, eax
+    jz .done
+
+    movzx eax, byte [input_byte]
+    cmp al, '0'
+    jb .done
+    cmp al, '9'
+    ja .done
+
+    sub eax, '0'
+    imul r8d, r8d, 10
+    add r8d, eax
+    jmp .read_char
+
+.done:
+    mov eax, r8d
+    ret
+
+print_int:
+    push rbx
+    push r13
+
+    mov ebx, eax
+    xor r13d, r13d
+
+    test ebx, ebx
+    jnz .convert
+
+    mov byte [input_byte], '0'
+    mov eax, 1
+    mov edi, 1
+    mov rsi, input_byte
+    mov edx, 1
+    syscall
+    jmp .finished
+
+.convert:
+    mov eax, ebx
+    xor edx, edx
+    mov ecx, 10
+    div ecx
+    push rdx
+    inc r13d
+    mov ebx, eax
+    test ebx, ebx
+    jnz .convert
+
+.print_digits:
+    pop rax
+    add al, '0'
+    mov [input_byte], al
+
+    mov eax, 1
+    mov edi, 1
+    mov rsi, input_byte
+    mov edx, 1
+    syscall
+
+    dec r13d
+    jnz .print_digits
+
+.finished:
+    pop r13
+    pop rbx
+    ret
